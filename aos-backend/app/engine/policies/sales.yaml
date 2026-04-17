@@ -1,0 +1,63 @@
+# AOS Policy Pack — Sales
+version: "1.0.0"
+
+rules:
+  - id: SAL-001
+    name: Block sales order to customer exceeding credit limit
+    domain: sales
+    action: create_sales_order
+    severity: critical
+    when:
+      - field: exceeds_credit_limit
+        op: eq
+        value: true
+    then:
+      block: true
+      reason: Customer credit limit exceeded. Use override workflow.
+
+  - id: SAL-002
+    name: Credit limit override requires CFO
+    domain: sales
+    action: override_credit_limit
+    when:
+      - field: amount
+        op: gte
+        value: 100000
+    then:
+      require_approval: cfo
+      max_wait_hours: 4
+
+  - id: SAL-003
+    name: Discount above 10% requires Sales Head approval
+    domain: sales
+    action: apply_discount
+    when:
+      - field: discount_pct
+        op: gt
+        value: 10
+    then:
+      require_approval: sales_head
+
+  - id: SAL-004
+    name: Low-margin order warning
+    domain: sales
+    action: create_sales_order
+    when:
+      - field: margin_pct
+        op: lt
+        value: 10
+    then:
+      warn: Order margin below 10%. Review pricing before confirming.
+      require_approval: sales_head
+
+  - id: SAL-005
+    name: Customer with overdue invoices — require Finance sign-off
+    domain: sales
+    action: create_sales_order
+    when:
+      - field: customer.has_overdue
+        op: eq
+        value: true
+    then:
+      require_approval: finance_manager
+      warn: Customer has overdue invoices.

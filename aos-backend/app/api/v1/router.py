@@ -5,13 +5,14 @@ Central router that includes all endpoint modules.
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, health
+from app.api.v1.endpoints import auth, health, policy
 
 api_router = APIRouter()
 
 # Core routes
 api_router.include_router(health.router)
 api_router.include_router(auth.router)
+api_router.include_router(policy.router)
 
 # Domain routes added as modules are built:
 # api_router.include_router(conversation.router)
@@ -23,5 +24,4 @@ api_router.include_router(auth.router)
 # api_router.include_router(hr.router)
 # api_router.include_router(approvals.router)
 # api_router.include_router(audit.router)
-# api_router.include_router(policy.router)
 # api_router.include_router(agents.router)

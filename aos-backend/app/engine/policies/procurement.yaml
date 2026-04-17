@@ -1,0 +1,84 @@
+# AOS Policy Pack — Procurement
+# Editable by business users through admin UI. Every change produces a new version.
+version: "1.0.0"
+
+rules:
+  - id: PROC-001
+    name: PO requires CFO approval above 10L
+    domain: procurement
+    action: create_purchase_order
+    description: Purchase orders >= INR 10,00,000 need CFO approval.
+    severity: critical
+    when:
+      - field: amount
+        op: gte
+        value: 1000000
+    then:
+      require_approval: cfo
+      max_wait_hours: 24
+
+  - id: PROC-002
+    name: PO requires Procurement Manager approval 50k–10L
+    domain: procurement
+    action: create_purchase_order
+    when:
+      - field: amount
+        op: gte
+        value: 50000
+      - field: amount
+        op: lt
+        value: 1000000
+    then:
+      require_approval: procurement_manager
+      max_wait_hours: 8
+
+  - id: PROC-003
+    name: Auto-approve low-value POs under 50k
+    domain: procurement
+    action: create_purchase_order
+    when:
+      - field: amount
+        op: lt
+        value: 50000
+    then:
+      auto_approve: true
+
+  - id: PROC-004
+    name: Block PO to vendor without GSTIN for taxable goods
+    domain: procurement
+    action: create_purchase_order
+    severity: critical
+    when:
+      - field: vendor.gstin
+        op: exists
+        value: false
+      - field: is_taxable
+        op: eq
+        value: true
+    then:
+      block: true
+      reason: Vendor has no GSTIN; cannot claim input tax credit.
+
+  - id: PROC-005
+    name: Warn on new vendor
+    domain: procurement
+    action: create_purchase_order
+    when:
+      - field: vendor.is_new
+        op: eq
+        value: true
+    then:
+      warn: New vendor — KYC and compliance verification required.
+      require_approval: procurement_manager
+
+  - id: PROC-006
+    name: Three-way match required for invoice posting
+    domain: procurement
+    action: post_vendor_invoice
+    when:
+      - field: has_po
+        op: eq
+        value: true
+    then:
+      require_three_way_match: true
+      tolerance_pct: 2.0

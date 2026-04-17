@@ -1,0 +1,63 @@
+# AOS Policy Pack — Inventory
+version: "1.0.0"
+
+rules:
+  - id: INV-001
+    name: Block dispatch if stock insufficient
+    domain: inventory
+    action: dispatch_stock
+    severity: critical
+    when:
+      - field: available_qty
+        op: lt
+        value: 0
+    then:
+      block: true
+      reason: Insufficient stock for dispatch.
+
+  - id: INV-002
+    name: Negative stock adjustment requires Inventory Head
+    domain: inventory
+    action: stock_adjustment
+    when:
+      - field: delta_qty
+        op: lt
+        value: 0
+    then:
+      require_approval: inventory_head
+      max_wait_hours: 12
+
+  - id: INV-003
+    name: Large write-off requires CFO
+    domain: inventory
+    action: stock_writeoff
+    when:
+      - field: value
+        op: gte
+        value: 100000
+    then:
+      require_approval: cfo
+
+  - id: INV-004
+    name: Expired batch cannot be dispatched
+    domain: inventory
+    action: dispatch_stock
+    severity: critical
+    when:
+      - field: batch.expired
+        op: eq
+        value: true
+    then:
+      block: true
+      reason: Batch is past expiry date.
+
+  - id: INV-005
+    name: Reorder suggestion when stock at/below reorder level
+    domain: inventory
+    action: reorder_check
+    when:
+      - field: at_or_below_reorder
+        op: eq
+        value: true
+    then:
+      suggest_reorder: true

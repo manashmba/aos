@@ -1,0 +1,59 @@
+# AOS Policy Pack — Agent / AI Governance
+version: "1.0.0"
+
+rules:
+  - id: AGT-001
+    name: Low-confidence actions require human approval
+    domain: agent
+    action: execute_tool
+    severity: critical
+    when:
+      - field: confidence
+        op: lt
+        value: 0.80
+    then:
+      require_approval: user
+      warn: Agent confidence below 80%.
+
+  - id: AGT-002
+    name: Block financial writes without idempotency token
+    domain: agent
+    action: execute_tool
+    severity: critical
+    when:
+      - field: is_financial_write
+        op: eq
+        value: true
+      - field: idempotency_key
+        op: exists
+        value: false
+    then:
+      block: true
+      reason: Financial writes must carry an idempotency token.
+
+  - id: AGT-003
+    name: Cap tool calls per agent turn
+    domain: agent
+    action: execute_tool
+    when:
+      - field: tool_calls_this_turn
+        op: gte
+        value: 10
+    then:
+      block: true
+      reason: Agent exceeded max tool calls per turn (10).
+
+  - id: AGT-004
+    name: Off-hours financial actions require extra approval
+    domain: agent
+    action: execute_tool
+    when:
+      - field: is_financial_write
+        op: eq
+        value: true
+      - field: is_off_hours
+        op: eq
+        value: true
+    then:
+      require_approval: cfo
+      warn: Financial action attempted outside business hours.

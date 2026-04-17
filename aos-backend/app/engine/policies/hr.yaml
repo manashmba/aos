@@ -1,0 +1,46 @@
+# AOS Policy Pack — HR
+version: "1.0.0"
+
+rules:
+  - id: HR-001
+    name: Leave longer than 15 days needs HR Head approval
+    domain: hr
+    action: apply_leave
+    when:
+      - field: days
+        op: gt
+        value: 15
+    then:
+      require_approval: hr_head
+
+  - id: HR-002
+    name: Reimbursement above 5k needs Finance Manager
+    domain: hr
+    action: submit_reimbursement
+    when:
+      - field: amount
+        op: gt
+        value: 5000
+    then:
+      require_approval: finance_manager
+
+  - id: HR-003
+    name: Reimbursement above 50k needs CFO
+    domain: hr
+    action: submit_reimbursement
+    when:
+      - field: amount
+        op: gte
+        value: 50000
+    then:
+      require_approval: cfo
+
+  - id: HR-004
+    name: Salary revision requires CFO + HR Head
+    domain: hr
+    action: revise_salary
+    severity: critical
+    then:
+      require_approval:
+        - cfo
+        - hr_head
