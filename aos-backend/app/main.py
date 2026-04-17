@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.agents.bootstrap import bootstrap_agents
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.logging import setup_logging
@@ -23,6 +24,7 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     """Application lifecycle: startup and shutdown events."""
     setup_logging()
+    bootstrap_agents()
     # Startup complete
     yield
     # Shutdown
