@@ -11,12 +11,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.agents.bootstrap import bootstrap_agents
+from app.api.v1.endpoints.audit import metrics_router
 from app.api.v1.router import api_router
-from app.integrations.bootstrap import bootstrap_integrations
 from app.core.config import get_settings
 from app.core.logging import setup_logging
 from app.core.redis import close_redis
+from app.integrations.bootstrap import bootstrap_integrations
 from app.middleware.audit import AuditMiddleware
+from app.middleware.observability import ObservabilityMiddleware
 
 settings = get_settings()
 
@@ -53,10 +55,12 @@ app.add_middleware(
 )
 
 app.add_middleware(AuditMiddleware)
+app.add_middleware(ObservabilityMiddleware)
 
 # ── Routes ──
 
 app.include_router(api_router, prefix=settings.api_prefix)
+app.include_router(metrics_router)  # /metrics at root for Prometheus scrape
 
 
 @app.get("/")

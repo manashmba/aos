@@ -7,6 +7,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     agents,
+    audit,
     auth,
     conversation,
     finance,
@@ -35,7 +36,7 @@ api_router.include_router(inventory.router)
 api_router.include_router(sales.router)
 api_router.include_router(hr.router)
 api_router.include_router(manufacturing.router)
+api_router.include_router(audit.router)
 
 # Added in later modules:
 # api_router.include_router(approvals.router)
-# api_router.include_router(audit.router)
