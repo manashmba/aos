@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aos-postgres
+  namespace: aos
+spec:
+  selector:
+    app: aos-postgres
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: aos-postgres
+  namespace: aos
+spec:
+  serviceName: aos-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aos-postgres
+  template:
+    metadata:
+      labels:
+        app: aos-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: pgvector/pgvector:pg16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: aos_user
+            - name: POSTGRES_PASSWORD
+              value: aos_password
+            - name: POSTGRES_DB
+              value: aos_db
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "aos_user", "-d", "aos_db"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi

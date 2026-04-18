@@ -2,119 +2,126 @@
 
 > **The ERP Replacement for the AI Era**
 
-A ground-up conversational, agentic operating system that replaces traditional ERP systems for mid-market enterprises. Business users interact through natural language, role-based copilots, autonomous agents, and event-driven workflows instead of rigid ERP screens.
-
-## Architecture Overview
+A ground-up conversational, agentic operating system that replaces
+traditional ERP for Indian mid-market enterprises. Business users
+interact through natural language, role-based copilots, and
+event-driven workflows instead of rigid ERP screens.
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  CLIENTS: Web App │ WhatsApp Bot │ Mobile │ Voice │ API      │
-├──────────────────────────────────────────────────────────────┤
-│  API Gateway + Auth (JWT + RBAC + ABAC)                      │
-├──────────────────────────────────────────────────────────────┤
-│  Conversation Service → Intent Parser → Context Resolver     │
-├──────────────────────────────────────────────────────────────┤
-│  LLM Gateway (Claude / GPT-4o / Gemini — model router)      │
-├──────────────────────────────────────────────────────────────┤
-│  Agent Orchestration Engine                                   │
-│  ├─ Interface Agents (role-based copilots)                   │
-│  ├─ Reasoning Agents (planner, decomposer)                   │
-│  ├─ Domain Agents (finance, procurement, inventory...)       │
-│  ├─ Action Agents (transaction, notification, document)      │
-│  ├─ Governance Agents (policy, audit, anomaly, compliance)   │
-│  └─ Memory Agents (retrieval, ontology, precedent)           │
-├──────────────────────────────────────────────────────────────┤
-│  Policy Engine │ Workflow Engine │ Rules Engine               │
-├──────────────────────────────────────────────────────────────┤
-│  Event Bus (Redis Streams / Kafka)                           │
-├──────────────────────────────────────────────────────────────┤
-│  PostgreSQL │ pgvector │ Redis │ S3 │ Audit Log              │
-├──────────────────────────────────────────────────────────────┤
-│  Integrations: GSTN │ Banking │ WhatsApp │ Tally │ Email     │
-└──────────────────────────────────────────────────────────────┘
+┌──────────────┐      ┌──────────────┐      ┌─────────────────┐
+│  Web (React) │─────▶│   Backend    │◀────▶│   PostgreSQL    │
+└──────────────┘      │  (FastAPI)   │      │  + pgvector     │
+┌──────────────┐      │              │      └─────────────────┘
+│  WhatsApp    │─────▶│  Orchestrator│      ┌─────────────────┐
+│   Bot (TS)   │      │  + Policy    │◀────▶│     Redis       │
+└──────────────┘      │  + Ledger    │      │  (streams+cache)│
+                      │  + Audit     │      └─────────────────┘
+                      └──────┬───────┘
+                             │
+                   ┌─────────┴────────────┐
+                   ▼                      ▼
+              Claude Sonnet           Integrations
+              (w/ GPT-4o fallback)    (GST/Bank/Tally/
+                                       Email/OCR/WA)
 ```
 
 ## Core Principle
 
-> **Generative AI interprets intent. Deterministic engines execute transactions.**
+> Generative AI interprets intent. Deterministic engines execute
+> transactions.
 >
-> The LLM never writes directly to the ledger. Every financial transaction passes through validation, policy checks, human approval, and deterministic posting.
+> The LLM never writes directly to the ledger. Every financial action
+> passes through policy evaluation, optional human approval, and
+> deterministic posting with idempotency keys.
 
-## Project Structure
+## Repositories in this monorepo
 
-```
-CRM/
-├── aos-backend/          # Python FastAPI backend
-│   ├── app/
-│   │   ├── api/          # REST API endpoints
-│   │   ├── core/         # Config, security, dependencies
-│   │   ├── models/       # SQLAlchemy database models
-│   │   ├── schemas/      # Pydantic request/response schemas
-│   │   ├── services/     # Business logic by domain
-│   │   ├── agents/       # AI agent classes
-│   │   ├── engine/       # Policy, ledger, workflow engines
-│   │   ├── integrations/ # External system connectors
-│   │   ├── memory/       # Memory management layer
-│   │   ├── middleware/   # Auth, logging, rate limiting
-│   │   └── utils/        # Shared utilities
-│   ├── migrations/       # Alembic DB migrations
-│   └── tests/            # Test suites
-├── aos-frontend/         # React + TypeScript frontend
-│   └── src/
-│       ├── components/   # UI components by domain
-│       ├── pages/        # Page-level views
-│       ├── hooks/        # Custom React hooks
-│       ├── services/     # API client services
-│       ├── store/        # State management
-│       └── types/        # TypeScript type definitions
-├── whatsapp-bot/         # WhatsApp Business API bot
-├── deploy/               # Docker, K8s, Terraform configs
-├── docs/                 # Architecture and API docs
-└── scripts/              # Setup and utility scripts
-```
+| Path | Purpose |
+|------|---------|
+| `aos-backend/`  | FastAPI + async SQLAlchemy + Alembic. Agents, policy engine, ledger, audit, domain services (finance, procurement, inventory, sales, HR, manufacturing), integrations layer. |
+| `aos-frontend/` | Vite + React + TypeScript + Tailwind. Chat UI, dashboard, trial balance, audit viewer. |
+| `whatsapp-bot/` | Express + TypeScript bridge between WhatsApp Business Cloud API and the backend's conversation service. |
+| `deploy/`       | Kubernetes manifests, Prometheus config, Docker assets. |
+| `docs/`         | Blueprint, runbooks, diagrams. |
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Backend | Python 3.12 + FastAPI |
-| Agent Framework | LangGraph + Custom Orchestrator |
-| LLM | Claude Sonnet (primary) + GPT-4o (fallback) |
+| Backend | Python 3.11 + FastAPI + async SQLAlchemy 2.0 |
+| Agent framework | Custom Orchestrator (LangGraph-ready) |
+| LLM | Claude Sonnet (primary) + GPT-4o-mini (fallback) |
 | Database | PostgreSQL 16 + pgvector |
-| Cache | Redis 7 |
-| Frontend | React 18 + TypeScript + Tailwind + shadcn/ui |
+| Cache / streams | Redis 7 |
+| Frontend | React 18 + TypeScript + Tailwind + shadcn-style primitives |
 | WhatsApp | Meta Cloud API |
-| Workflow | Temporal.io (later) / Custom async (MVP) |
-| Auth | JWT + RBAC + ABAC |
+| Auth | JWT + RBAC |
+| Observability | Prometheus + Grafana + structlog |
 | Hosting | AWS ap-south-1 (India data residency) |
+
+## Quick start — full stack in Docker
+
+```bash
+cp .env.example .env       # fill in ANTHROPIC_API_KEY, JWT_SECRET_KEY, …
+make up                    # builds + starts everything
+make migrate               # run DB migrations
+open http://localhost:5173 # web app
+```
+
+URLs:
+- Backend: http://localhost:8000 (Swagger at `/docs`)
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+- Bot webhook: http://localhost:3001/webhook
+
+## Development — run services directly
+
+```bash
+make backend-dev     # uvicorn with reload on :8000
+make frontend-dev    # vite on :5173 (proxies /api -> :8000)
+make bot-dev         # tsx watch on :3001
+make backend-test    # pytest
+```
+
+## Architecture highlights
+
+- **Conversation → Agent → Tool pipeline**: router classifies intent,
+  domain agent plans tool calls via Claude (OpenAI fallback),
+  orchestrator evaluates each call against the policy engine, then
+  executes deterministic tools.
+- **Policy engine**: per-domain YAML rule packs (finance, procurement,
+  sales, inventory, HR, agent) with `require_approval`, `block`,
+  `warn` effects. Tunable INR-calibrated thresholds.
+- **Ledger engine** (`app/engine/ledger`): declarative posting rules
+  map business events (e.g. `sales.invoice_posted`, `hr.payroll_run`)
+  to balanced double-entry JEs with Indian CoA codes. Idempotent
+  postings and fiscal period locks.
+- **Audit**: append-only `audit_logs` with SHA-256 hash chain —
+  `GET /api/v1/audit/verify` walks the chain and reports the first
+  broken link.
+- **Integrations**: pluggable protocol + mock for WhatsApp, GSTN/IRP,
+  banking, email, Tally, OCR.
+- **Observability**: Prometheus metrics at `/metrics`; structlog JSON
+  logs with `correlation_id` bound per request.
 
 ## Modules
 
 1. **Finance** — AP, AR, GL, tax, compliance, month-end close
-2. **Procurement** — Vendor mgmt, RFQ, PO, GRN, invoice matching
+2. **Procurement** — Vendor mgmt, RFQ, PO, GRN, three-way match
 3. **Inventory** — Stock, reorder, batch tracking, dispatch, cycle count
 4. **Sales** — Quotations, orders, pricing, credit, collections
-5. **Manufacturing** — BOM, MRP, scheduling, quality, wastage
-6. **HR** — Workflows, reimbursements, attendance, payroll, policy Q&A
+5. **Manufacturing** — BOM, material availability, production orders
+6. **HR** — Onboarding, leave, reimbursement, attendance, payroll
 
-## Quick Start
+## Deployment
 
-```bash
-# Backend
-cd aos-backend
-python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-pip install -r requirements.txt
-cp .env.example .env       # Configure your environment
-alembic upgrade head       # Run migrations
-uvicorn app.main:app --reload
-
-# Frontend
-cd aos-frontend
-npm install
-cp .env.example .env.local
-npm run dev
-```
+- `docker-compose.yml` brings up a single-host stack (Postgres, Redis,
+  backend, frontend, whatsapp-bot, Prometheus, Grafana).
+- `deploy/k8s/` has namespace, postgres StatefulSet, redis Deployment,
+  backend/frontend/bot Deployments with HPA, Ingress with TLS.
+- CI workflow is available at `deploy/ci.yml.sample` — copy it to
+  `.github/workflows/ci.yml` when pushing with a PAT that has the
+  `workflow` scope.
 
 ## License
 

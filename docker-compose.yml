@@ -1,0 +1,107 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: aos-postgres
+    environment:
+      POSTGRES_USER: aos_user
+      POSTGRES_PASSWORD: aos_password
+      POSTGRES_DB: aos_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - aos_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aos_user -d aos_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: aos-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - aos_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  aos-backend:
+    build:
+      context: ./aos-backend
+    container_name: aos-backend
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+asyncpg://aos_user:aos_password@postgres:5432/aos_db
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-in-development}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      WHATSAPP_BOT_URL: http://aos-whatsapp-bot:3001
+      WHATSAPP_BOT_TOKEN: ${AOS_SERVICE_TOKEN:-dev-service-token}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  aos-frontend:
+    build:
+      context: ./aos-frontend
+    container_name: aos-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - aos-backend
+
+  aos-whatsapp-bot:
+    build:
+      context: ./whatsapp-bot
+    container_name: aos-whatsapp-bot
+    environment:
+      PORT: 3001
+      WA_VERIFY_TOKEN: ${WA_VERIFY_TOKEN:-aos-dev-verify}
+      WA_PHONE_NUMBER_ID: ${WA_PHONE_NUMBER_ID:-}
+      WA_ACCESS_TOKEN: ${WA_ACCESS_TOKEN:-}
+      AOS_API_URL: http://aos-backend:8000/api/v1
+      AOS_SERVICE_TOKEN: ${AOS_SERVICE_TOKEN:-dev-service-token}
+      REDIS_URL: redis://redis:6379/1
+    ports:
+      - "3001:3001"
+    depends_on:
+      aos-backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: aos-prometheus
+    volumes:
+      - ./deploy/docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - aos-backend
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: aos-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - aos_grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  aos_pg_data:
+  aos_redis_data:
+  aos_grafana_data:

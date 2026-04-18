@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: aos-dev
+
+scrape_configs:
+  - job_name: aos-backend
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["aos-backend:8000"]
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
