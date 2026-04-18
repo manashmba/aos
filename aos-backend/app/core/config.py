@@ -53,6 +53,8 @@ class Settings(BaseSettings):
     whatsapp_phone_number_id: str = ""
     whatsapp_access_token: str = ""
     whatsapp_verify_token: str = ""
+    whatsapp_bot_url: str = ""          # HTTP bridge to the aos-whatsapp-bot service
+    whatsapp_bot_token: str = ""        # Shared secret for /notify/* calls
 
     # GST
     gst_api_url: str = ""
