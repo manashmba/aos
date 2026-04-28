@@ -10,11 +10,12 @@ from __future__ import annotations
 import uuid
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
 from app.agents.bootstrap import get_orchestrator
 from app.core.dependencies import AuthUser, DbSession, get_current_user
+from app.core.i18n import normalize as normalize_lang
 from app.services.conversation import ConversationService
 
 router = APIRouter(prefix="/conversation", tags=["conversation"])
@@ -39,6 +40,10 @@ class SessionResponse(BaseModel):
 
 class MessageRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=8000)
+    # Optional per-turn override. Falls back to session.language, then to the
+    # value resolved by LanguageMiddleware. Lets a user temporarily switch
+    # languages mid-session without resetting the session record.
+    language: Optional[str] = Field(None, max_length=10)
 
 
 class MessageResponse(BaseModel):
@@ -71,14 +76,19 @@ def _uuid(value: Any) -> uuid.UUID:
 async def start_session(
     req: StartSessionRequest,
     db: DbSession,
+    request: Request,
     user: AuthUser = Depends(get_current_user),
 ) -> SessionResponse:
     svc = _get_service(db)
+    # Body wins; otherwise inherit whatever LanguageMiddleware negotiated
+    # from headers. Both are coerced through normalize() so an unsupported
+    # code never makes it into the DB.
+    chosen = normalize_lang(req.language or getattr(request.state, "language", None))
     sess = await svc.start_session(
         org_id=_uuid(user.org_id),
         user_id=_uuid(user.user_id),
         channel=req.channel,
-        language=req.language,
+        language=chosen,
         title=req.title,
     )
     return SessionResponse(
@@ -96,6 +106,7 @@ async def send_message(
     session_id: uuid.UUID,
     req: MessageRequest,
     db: DbSession,
+    request: Request,
     user: AuthUser = Depends(get_current_user),
 ) -> MessageResponse:
     svc = _get_service(db)
@@ -105,6 +116,13 @@ async def send_message(
     if str(sess.org_id) != str(user.org_id):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Session belongs to another org")
 
+    # Per-turn precedence: explicit body > middleware-negotiated header > session default.
+    turn_language = normalize_lang(
+        req.language
+        or getattr(request.state, "language", None)
+        or sess.language
+    )
+
     data = await svc.handle_turn(
         session_id=session_id,
         org_id=_uuid(user.org_id),
@@ -112,7 +130,7 @@ async def send_message(
         user_role=user.role,
         message=req.message,
         channel=sess.channel,
-        language=sess.language,
+        language=turn_language,
     )
     return MessageResponse(
         response=data.get("response"),

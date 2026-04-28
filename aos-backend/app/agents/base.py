@@ -173,17 +173,38 @@ class BaseAgent(abc.ABC):
         tool_calls: list[ToolCall],
         tool_results: list[ToolResult],
     ) -> str:
-        """Default post-processor returns a terse summary of tool outcomes."""
-        if not tool_results:
-            return "No actions taken."
+        """Default post-processor returns a terse summary of tool outcomes.
+
+        Localised for the 8 supported UI languages — falls back to English
+        for anything else. Used when the LLM didn't produce response text
+        (e.g. tool-only agents or planning failures).
+        """
+        from app.core.i18n import normalize  # local import to avoid cycles
+
         ok = sum(1 for r in tool_results if r.success)
         fail = len(tool_results) - ok
         pending = sum(1 for r in tool_results if r.requires_approval)
-        parts = [f"{ok} completed"]
+
+        # Per-language phrase parts: (no_action, completed, awaiting, failed)
+        phrases: dict[str, tuple[str, str, str, str]] = {
+            "en": ("No actions taken.", "{n} completed",      "{n} awaiting approval", "{n} failed"),
+            "hi": ("कोई कार्य नहीं हुआ।", "{n} पूर्ण",          "{n} अनुमोदन प्रतीक्षित", "{n} विफल"),
+            "bn": ("কোন কাজ হয়নি।",   "{n} সম্পন্ন",          "{n} অনুমোদনের অপেক্ষায়", "{n} ব্যর্থ"),
+            "ta": ("எந்த நடவடிக்கையும் இல்லை.", "{n} முடிந்தது", "{n} அனுமதிக்கு நிலுவை",  "{n} தோல்வி"),
+            "te": ("చర్యలు తీసుకోబడలేదు.", "{n} పూర్తి",        "{n} అనుమతి పెండింగ్",     "{n} విఫలం"),
+            "mr": ("कोणतीही कृती झाली नाही.", "{n} पूर्ण",        "{n} मंजुरी प्रलंबित",      "{n} अयशस्वी"),
+            "gu": ("કોઈ ક્રિયા થઈ નથી.",  "{n} પૂર્ણ",            "{n} મંજૂરી બાકી",          "{n} નિષ્ફળ"),
+            "kn": ("ಯಾವುದೇ ಕ್ರಮ ತೆಗೆದುಕೊಂಡಿಲ್ಲ.", "{n} ಪೂರ್ಣ",  "{n} ಅನುಮೋದನೆ ಬಾಕಿ",   "{n} ವಿಫಲ"),
+        }
+        none_msg, done_t, pend_t, fail_t = phrases.get(normalize(context.language), phrases["en"])
+
+        if not tool_results:
+            return none_msg
+        parts = [done_t.format(n=ok)]
         if pending:
-            parts.append(f"{pending} awaiting approval")
+            parts.append(pend_t.format(n=pending))
         if fail:
-            parts.append(f"{fail} failed")
+            parts.append(fail_t.format(n=fail))
         return ", ".join(parts) + "."
 
     def can_handle_intent(self, intent: str) -> bool:

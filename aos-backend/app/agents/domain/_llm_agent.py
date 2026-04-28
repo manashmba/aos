@@ -17,6 +17,7 @@ from typing import Optional
 from app.agents.base import AgentContext, BaseAgent, ToolCall
 from app.agents.llm import LLMClient
 from app.agents.tools.registry import ToolRegistry, tool_registry
+from app.core.i18n import with_language_directive
 
 
 class LLMDomainAgent(BaseAgent):
@@ -44,9 +45,13 @@ class LLMDomainAgent(BaseAgent):
             return []
 
         messages = [{"role": "user", "content": user_message}]
+        # Localize the system prompt so the LLM responds in the user's language.
+        # The directive is appended (not prepended) so static prefix stays
+        # cache-eligible across different locales.
+        system = with_language_directive(self.system_prompt, context.language)
         try:
             resp = await self.llm.complete(
-                system=self.system_prompt,
+                system=system,
                 messages=messages,
                 tools=schemas,
                 max_tokens=2048,

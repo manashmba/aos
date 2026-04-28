@@ -18,6 +18,7 @@ from app.core.logging import setup_logging
 from app.core.redis import close_redis
 from app.integrations.bootstrap import bootstrap_integrations
 from app.middleware.audit import AuditMiddleware
+from app.middleware.language import LanguageMiddleware
 from app.middleware.observability import ObservabilityMiddleware
 
 settings = get_settings()
@@ -55,6 +56,7 @@ app.add_middleware(
 )
 
 app.add_middleware(AuditMiddleware)
+app.add_middleware(LanguageMiddleware)
 app.add_middleware(ObservabilityMiddleware)
 
 # ── Routes ──
