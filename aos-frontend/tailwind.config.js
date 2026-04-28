@@ -40,6 +40,31 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        // Inter for Latin + Noto fallbacks per Indic script. Browser picks
+        // the first family that has a glyph for each codepoint.
+        sans: [
+          "Inter",
+          "Noto Sans Devanagari",
+          "Noto Sans Bengali",
+          "Noto Sans Tamil",
+          "Noto Sans Telugu",
+          "Noto Sans Gujarati",
+          "Noto Sans Kannada",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
+      },
+      keyframes: {
+        "fade-in-up": {
+          "0%": { opacity: "0", transform: "translateY(4px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "fade-in-up": "fade-in-up 180ms ease-out",
+      },
     },
   },
   plugins: [],

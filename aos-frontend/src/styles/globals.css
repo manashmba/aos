@@ -4,46 +4,83 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Neutral slate-indigo palette. Avoids saffron/green (kitschy) while
+       still reading as premium-Indian through typography + voice. */
+    --background: 210 33% 99%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
+    --card-foreground: 222 47% 11%;
+    --primary: 243 75% 51%;              /* indigo-600 */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 215 25% 95%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 215 28% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 245 60% 95%;
+    --accent-foreground: 243 75% 35%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
+    --success: 152 60% 40%;
+    --warning: 38 92% 50%;
+    --border: 215 20% 90%;
+    --input: 215 20% 90%;
+    --ring: 243 75% 51%;
+    --radius: 0.625rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+    --primary: 243 75% 65%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 222 40% 14%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 40% 14%;
+    --muted-foreground: 215 16% 65%;
+    --accent: 243 50% 20%;
+    --accent-foreground: 243 75% 85%;
+    --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --success: 152 60% 50%;
+    --warning: 38 92% 60%;
+    --border: 222 40% 18%;
+    --input: 222 40% 18%;
+    --ring: 243 75% 65%;
   }
 
   * { @apply border-border; }
-  body { @apply bg-background text-foreground font-sans antialiased; }
+  html { font-feature-settings: "cv11", "ss01", "ss03"; }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Indic scripts tend to render slightly tighter than Latin; nudge leading
+     so Devanagari/Tamil conjuncts don't kiss line above. */
+  html[lang="hi"] body,
+  html[lang="mr"] body { line-height: 1.7; }
+  html[lang="ta"] body,
+  html[lang="te"] body,
+  html[lang="kn"] body,
+  html[lang="bn"] body,
+  html[lang="gu"] body { line-height: 1.65; }
+}
+
+@layer components {
+  /* Soft gradient used in the login hero + empty states */
+  .bg-hero {
+    background: radial-gradient(
+        80% 60% at 20% 10%,
+        hsl(243 75% 95%) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        60% 50% at 100% 100%,
+        hsl(180 60% 92%) 0%,
+        transparent 55%
+      ),
+      hsl(var(--background));
+  }
 }

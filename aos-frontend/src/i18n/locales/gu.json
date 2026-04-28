@@ -1,0 +1,65 @@
+{
+  "brand": {
+    "tagline": "ભારતીય વ્યવસાય માટે એજન્ટિક ઓપરેટિંગ સિસ્ટમ",
+    "pitch": "તમારા ERP સાથે સાથીદારની જેમ વાત કરો. નાણાં, ખરીદી, વેચાણ, સ્ટૉક, કર્મચારી — એક વાતચીત, આઠ ભારતીય ભાષાઓ."
+  },
+  "auth": {
+    "signIn": "સાઇન ઇન કરો",
+    "welcomeBack": "ફરી સ્વાગત છે",
+    "subtitle": "મધ્યમ વ્યવસાયો માટે સંવાદાત્મક ERP",
+    "email": "ઇમેઇલ",
+    "password": "પાસવર્ડ",
+    "phone": "મોબાઇલ નંબર",
+    "continueWithEmail": "ઇમેઇલથી ચાલુ રાખો",
+    "continueWithPhone": "મોબાઇલથી ચાલુ રાખો",
+    "orDivider": "અથવા",
+    "signingIn": "સાઇન ઇન થઈ રહ્યું છે…",
+    "failed": "સાઇન-ઇન નિષ્ફળ.",
+    "demoBanner": "ડેમો મોડ — કોઈપણ ઇમેઇલ/પાસવર્ડ કામ કરશે. બધો ડેટા સ્થાનિક રીતે મોક છે.",
+    "footer": "સુરક્ષિત · RBI-સંગત · ડેટા ભારતમાં રહે છે"
+  },
+  "nav": {
+    "sectionWorkspace": "કાર્યસ્થળ",
+    "sectionModules": "મોડ્યુલ્સ",
+    "sectionGovern": "સંચાલન",
+    "chat": "ચેટ",
+    "dashboard": "ડેશબોર્ડ",
+    "finance": "નાણાં",
+    "procurement": "ખરીદી",
+    "sales": "વેચાણ",
+    "inventory": "સ્ટૉક",
+    "hr": "કર્મચારી",
+    "approvals": "મંજૂરી",
+    "audit": "ઑડિટ"
+  },
+  "topbar": { "demoBadge": "ડેમો મોડ", "signOut": "સાઇન આઉટ", "language": "ભાષા" },
+  "dashboard": {
+    "title": "ડેશબોર્ડ",
+    "greeting": "નમસ્તે {{name}}",
+    "subtitle": "આજે તમારા ધ્યાનની જરૂરિયાત.",
+    "totalReceivables": "કુલ લેણું",
+    "current": "વર્તમાન",
+    "days31_60": "31–60 દિવસ",
+    "overdue90": "90+ દિવસ બાકી",
+    "reorderTitle": "રી-ઓર્ડર સૂચનો",
+    "colProduct": "ઉત્પાદન",
+    "colOnHand": "સ્ટૉકમાં",
+    "colReorder": "રી-ઓર્ડર સ્તર",
+    "colSuggested": "સૂચવેલ જથ્થો"
+  },
+  "chat": {
+    "welcome": "નમસ્તે {{name}} — હું AOS છું. નાણાં, ખરીદી, વેચાણ, સ્ટૉક કે કર્મચારી વિશે પૂછો.",
+    "placeholder": "કંઈપણ પૂછો…",
+    "mic": "અવાજ ઇનપુટ",
+    "send": "મોકલો",
+    "thinking": "વિચારી રહ્યું છે…",
+    "pendingApproval": "મંજૂરી બાકી",
+    "suggestions": {
+      "trialBalance": "ટ્રાયલ બૅલેન્સ બતાવો",
+      "reorder": "શું રી-ઓર્ડર કરવાનું?",
+      "createPO": "₹50,000 નો PO બનાવો",
+      "leave": "3 દિવસની રજા અરજી"
+    }
+  },
+  "audit": { "title": "ઑડિટ ટ્રેઇલ", "verify": "ચેઇન ચકાસો", "recent": "તાજેતરની ઘટનાઓ" }
+}

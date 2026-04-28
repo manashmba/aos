@@ -1,0 +1,106 @@
+{
+  "brand": {
+    "name": "AOS",
+    "tagline": "The Agentic Operating System for Indian business",
+    "pitch": "Talk to your ERP like a colleague. Finance, procurement, sales, inventory, HR — one conversation, eight Indian languages."
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "welcomeBack": "Welcome back",
+    "subtitle": "Conversational ERP for mid-market India",
+    "email": "Email",
+    "password": "Password",
+    "phone": "Mobile number",
+    "otp": "One-time password",
+    "continueWithEmail": "Continue with email",
+    "continueWithPhone": "Continue with mobile",
+    "sendOtp": "Send OTP",
+    "enterOtp": "Enter the 6-digit OTP sent to {{phone}}",
+    "orDivider": "or",
+    "signingIn": "Signing in…",
+    "failed": "Sign-in failed. Check your credentials.",
+    "demoBanner": "Demo mode — any email/password works. All data is mocked locally; nothing is sent to a backend.",
+    "footer": "Secure · RBI-aligned · Data stays in India (AWS ap-south-1)"
+  },
+  "nav": {
+    "sectionWorkspace": "Workspace",
+    "sectionModules": "Modules",
+    "sectionGovern": "Governance",
+    "chat": "Chat",
+    "dashboard": "Dashboard",
+    "finance": "Finance",
+    "procurement": "Procurement",
+    "sales": "Sales",
+    "inventory": "Inventory",
+    "hr": "People",
+    "approvals": "Approvals",
+    "audit": "Audit"
+  },
+  "topbar": {
+    "demoBadge": "Demo mode",
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Good day, {{name}}",
+    "subtitle": "Here's what needs your attention today.",
+    "totalReceivables": "Total Receivables",
+    "current": "Current",
+    "days31_60": "31–60 days",
+    "overdue90": "90+ overdue",
+    "reorderTitle": "Reorder suggestions",
+    "reorderSubtitle": "SKUs below reorder level",
+    "colProduct": "Product",
+    "colOnHand": "On hand",
+    "colReorder": "Reorder level",
+    "colSuggested": "Suggested qty",
+    "healthy": "All stocks healthy.",
+    "loading": "Loading…"
+  },
+  "finance": {
+    "title": "Trial Balance",
+    "asOfToday": "As of today",
+    "colCode": "Code",
+    "colAccount": "Account",
+    "colType": "Type",
+    "colDebits": "Debits",
+    "colCredits": "Credits",
+    "colBalance": "Balance"
+  },
+  "chat": {
+    "welcome": "Namaste {{name}} — I'm AOS. Ask me about finance, procurement, sales, inventory or people.",
+    "placeholder": "Ask anything…",
+    "thinking": "thinking…",
+    "send": "Send",
+    "mic": "Voice input",
+    "pendingApproval": "Pending approval",
+    "suggestions": {
+      "trialBalance": "Show trial balance",
+      "reorder": "What needs reordering?",
+      "createPO": "Create a PO for ₹50,000",
+      "leave": "Apply 3 days leave"
+    }
+  },
+  "audit": {
+    "title": "Audit trail",
+    "subtitle": "Tamper-evident hash-chained log of every business action.",
+    "verify": "Verify chain",
+    "recent": "Recent events",
+    "colTime": "Time",
+    "colEvent": "Event",
+    "colActor": "Actor",
+    "colEntity": "Entity",
+    "colOutcome": "Outcome",
+    "integrityOk": "Integrity OK — {{count}} events verified.",
+    "broken": "Chain broken at {{where}} (after {{count}} events)."
+  },
+  "stub": {
+    "title": "{{module}}",
+    "body": "Use chat to create and approve transactions. Detailed tables and forms land in the next iteration."
+  },
+  "common": {
+    "loading": "Loading…",
+    "empty": "Nothing to show yet."
+  }
+}

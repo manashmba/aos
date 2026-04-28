@@ -1,18 +1,34 @@
 import axios, { AxiosInstance } from "axios";
 import { useAuthStore } from "@/store/auth";
+import { DEMO_MODE, demoAdapter } from "@/lib/demo";
+import i18n, { LANGUAGES, type LangCode } from "@/i18n";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
 
 export const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 30_000,
+  ...(DEMO_MODE ? { adapter: demoAdapter } : {}),
 });
+
+export { DEMO_MODE };
+
+/** Current BCP-47 tag for outgoing requests (e.g. `hi-IN`). */
+function currentBcp47(): string {
+  const code = (i18n.resolvedLanguage ?? "en") as LangCode;
+  return LANGUAGES.find((l) => l.code === code)?.locale ?? "en-IN";
+}
 
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // Negotiate response language with the backend on every call. The backend's
+  // LanguageMiddleware reads X-Language first, then Accept-Language.
+  const lng = currentBcp47();
+  config.headers["Accept-Language"] = lng;
+  config.headers["X-Language"] = lng.split("-")[0];
   return config;
 });
 
@@ -54,9 +70,19 @@ export interface AgentRunResult {
 }
 
 export const ConversationAPI = {
-  createSession: (channel = "web") => api.post("/conversation/sessions", { channel }),
+  createSession: (channel = "web") =>
+    api.post("/conversation/sessions", {
+      channel,
+      // Belt-and-suspenders: send the language in the body too, so a later
+      // turn that lands on a backend with a different middleware order still
+      // gets the right session-default language.
+      language: i18n.resolvedLanguage ?? "en",
+    }),
   sendMessage: (sessionId: string, message: string) =>
-    api.post<AgentRunResult>(`/conversation/sessions/${sessionId}/messages`, { message }),
+    api.post<AgentRunResult>(`/conversation/sessions/${sessionId}/messages`, {
+      message,
+      language: i18n.resolvedLanguage ?? "en",
+    }),
   getHistory: (sessionId: string) =>
     api.get(`/conversation/sessions/${sessionId}/history`),
   endSession: (sessionId: string) =>
